@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools"]
+
+[flake8]
+max-line-length = 120
+
+[project]
+name = "disaster_tweets"
+authors = [
+  {name = "Csaba Zsolnai"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dynamic = ["version"]
+dependencies = [
+  "torch",
+  "pandas",
+  "ipywidgets",
+  "tqdm",
+  "scikit-learn",
+  "scipy",
+  "matplotlib",
+  "pydantic",
+  "jupyterlab",
+  "kaggle"
+]
+
+[project.optional-dependencies]
+dev = [
+  "black[jupyter]==22.12.0",
+  "flake8==6.0.0",
+  "flake8-builtins==2.1.0",
+  "flake8-bugbear==22.10.27",
+  "flake8-comprehensions==3.10.1",
+  "flake8-docstrings==1.6.0",
+  "isort==5.12.0",
+  "mypy==1.10.0",
+  "pandas-stubs",
+  "types-beautifulsoup4",
+  "types-tqdm",
+  "toml-sort",
+  "jupyterlab",
+  "pytest==8.2.1",
+  "pytest_httpx",
+  "pytest-cov",
+  "pynvml",
+  "types-requests"
+]
+
+[tool.black]
+line-length = 120
+preview = true
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = false
