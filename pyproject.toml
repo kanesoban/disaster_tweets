@@ -22,7 +22,17 @@ dependencies = [
   "matplotlib",
   "pydantic",
   "jupyterlab",
-  "kaggle"
+  "kaggle",
+  "bs4",
+  "requests",
+  "pyspellchecker",
+  "language_tool_python",
+  "torch",
+  "spacy",
+  "sentence_transformers",
+  "seaborn",
+  "langdetect",
+  "nltk"
 ]
 
 [project.optional-dependencies]
