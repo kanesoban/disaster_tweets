@@ -1,0 +1,10 @@
+data_path: 'data'
+batch_size: 16
+num_workers: 4
+max_seq_length: 128
+bert_model: 'bert-base-uncased'
+learning_rate: 0.001
+num_epochs: 1
+validation_split: 0.2
+output_dir: 'output'
+gpus: 1

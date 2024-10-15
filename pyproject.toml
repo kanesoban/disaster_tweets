@@ -32,7 +32,9 @@ dependencies = [
   "sentence_transformers",
   "seaborn",
   "langdetect",
-  "nltk"
+  "nltk",
+  "lightning",
+  "numpy<2"
 ]
 
 [project.optional-dependencies]
