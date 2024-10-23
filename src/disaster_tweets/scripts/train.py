@@ -1,6 +1,8 @@
 """Defines entrypoint for training."""
 import argparse
 import csv
+import os.path
+import shutil
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -94,4 +96,6 @@ if __name__ == "__main__":
     with open(args.config, "r") as f:
         config = yaml.safe_load(f)
 
+    os.makedirs(config["output_dir"], exist_ok=True)
+    shutil.copy(args.config, os.path.join(config["output_dir"], "config.yml"))
     main(config)

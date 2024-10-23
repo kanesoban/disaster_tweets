@@ -34,7 +34,8 @@ dependencies = [
   "langdetect",
   "nltk",
   "lightning",
-  "numpy<2"
+  "numpy<2",
+  "nlpaug"
 ]
 
 [project.optional-dependencies]

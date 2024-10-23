@@ -2,7 +2,7 @@
 
 import pytorch_lightning as pl
 import torch
-from transformers import AdamW, BertForSequenceClassification, BertTokenizer
+from transformers import AdamW, BertForSequenceClassification, BertTokenizer, AutoModelForSequenceClassification, AutoTokenizer
 
 
 class TextClassifier(pl.LightningModule):
@@ -11,8 +11,8 @@ class TextClassifier(pl.LightningModule):
     def __init__(self, config, class_weights=None):
         """Create model and tokenizer."""
         super().__init__()
-        self.model = BertForSequenceClassification.from_pretrained(config["bert_model"])
-        self.tokenizer = BertTokenizer.from_pretrained(config["bert_model"])
+        self.model = AutoModelForSequenceClassification.from_pretrained(config["model"])
+        self.tokenizer = AutoTokenizer.from_pretrained(config["model"])
         self.loss = torch.nn.CrossEntropyLoss(weight=torch.tensor(class_weights))
         self.config = config
         self.train_losses = []
