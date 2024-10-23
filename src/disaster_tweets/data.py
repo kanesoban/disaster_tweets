@@ -1,10 +1,12 @@
 """Package for data related code."""
+import nlpaug.augmenter.char as nac
+import nlpaug.augmenter.word as naw
 import pandas as pd
 import pytorch_lightning as pl
 import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
-from transformers import BertTokenizer
+from transformers import AutoTokenizer
 
 
 class ClassifierDataModule(pl.LightningDataModule):
@@ -29,11 +31,15 @@ class ClassifierDataModule(pl.LightningDataModule):
         train, val = train_test_split(self.train_df, test_size=self.config["validation_split"])
 
         # Define tokenizer
-        self.tokenizer = BertTokenizer.from_pretrained(self.config["bert_model"])
+        self.tokenizer = AutoTokenizer.from_pretrained(self.config["model"])
 
         # Create datasets
         self.train_dataset = TextClassificationDataset(
-            train["text"], train["target"], self.tokenizer, self.config["max_seq_length"]
+            train["text"],
+            train["target"],
+            self.tokenizer,
+            self.config["max_seq_length"],
+            augment=self.config["augment"],
         )
 
         self.validation_dataset = TextClassificationDataset(
@@ -74,13 +80,20 @@ class ClassifierDataModule(pl.LightningDataModule):
 class TextClassificationDataset(Dataset):
     """Dataset module for text classification."""
 
-    def __init__(self, text: pd.Series, target: pd.Series | None, tokenizer: BertTokenizer, max_length: int):
+    def __init__(
+        self, text: pd.Series, target: pd.Series | None, tokenizer: AutoTokenizer, max_length: int, augment=False
+    ):
         """Create single dataset with targets."""
         self.text = list(text)
         self.target = list(target) if target is not None else None
         self.df_index = text.index.tolist()
         self.tokenizer = tokenizer
         self.max_length = max_length
+        self.augment = augment
+        if self.augment:
+            self.ocr_aug = nac.OcrAug(aug_char_p=0.1, aug_word_p=0.1)
+            self.random_char_aug = nac.RandomCharAug(action="swap", aug_char_p=0.0, aug_word_p=0.1)
+            self.spelling_aug = naw.SpellingAug(aug_p=0.1)
 
     def __len__(self):
         """Get size of the dataset."""
@@ -88,8 +101,13 @@ class TextClassificationDataset(Dataset):
 
     def __getitem__(self, idx):
         """Fetch a single sample from the dataset."""
+        if self.augment:
+            text = self.augmentation(self.text[idx])
+        else:
+            text = self.text[idx]
+
         text_encoded = self.tokenizer.encode_plus(
-            self.text[idx], max_length=self.max_length, padding="max_length", truncation=True
+            text, max_length=self.max_length, padding="max_length", truncation=True
         )
         item = {
             "input_ids": torch.tensor(text_encoded["input_ids"], dtype=torch.long),
@@ -98,3 +116,22 @@ class TextClassificationDataset(Dataset):
         if self.target is not None:
             item["labels"] = torch.tensor(self.target[idx], dtype=torch.long)
         return item
+
+    def augmentation(self, text: str) -> str:
+        """
+        Augment text.
+
+        Parameters
+        ----------
+        text : str
+            The input text to be augmented.
+
+        Returns
+        -------
+        str
+            The augmented text after applying OCR, random character, and spelling augmentations.
+        """
+        text = self.ocr_aug.augment(text, n=1)[0]
+        text = self.random_char_aug.augment(text)[0]
+        text = self.spelling_aug.augment(text)[0]
+        return text

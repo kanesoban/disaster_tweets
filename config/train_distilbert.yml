@@ -1,0 +1,14 @@
+data_path: 'data'
+batch_size: 128
+num_workers: 4
+max_seq_length: 128
+model: 'distilbert/distilbert-base-uncased'
+learning_rate: 0.0001
+validation_split: 0.2
+output_dir: 'outputs/distilbert_output_aug'
+gpus: 1
+train_only_head: False
+min_epochs: 10
+max_epochs: 200
+patience: 5
+augment: False

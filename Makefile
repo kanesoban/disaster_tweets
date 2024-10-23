@@ -10,3 +10,6 @@ check_lint:
 	flake8 src/ --max-line-length 120
 	toml-sort --check pyproject.toml
 	mypy src --ignore-missing-imports
+
+train:
+	python src/disaster_tweets/scripts/train.py -c config/train_$(model).yml
