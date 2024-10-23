@@ -2,7 +2,7 @@
 
 import pytorch_lightning as pl
 import torch
-from transformers import AdamW, BertForSequenceClassification, BertTokenizer, AutoModelForSequenceClassification, AutoTokenizer
+from transformers import AdamW, AutoModelForSequenceClassification, AutoTokenizer
 
 
 class TextClassifier(pl.LightningModule):

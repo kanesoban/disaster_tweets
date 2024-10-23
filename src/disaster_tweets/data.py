@@ -1,11 +1,11 @@
 """Package for data related code."""
+import nlpaug.augmenter.char as nac
+import nlpaug.augmenter.word as naw
 import pandas as pd
 import pytorch_lightning as pl
 import torch
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
-import nlpaug.augmenter.word as naw
-import nlpaug.augmenter.char as nac
 from transformers import AutoTokenizer
 
 
@@ -35,7 +35,11 @@ class ClassifierDataModule(pl.LightningDataModule):
 
         # Create datasets
         self.train_dataset = TextClassificationDataset(
-            train["text"], train["target"], self.tokenizer, self.config["max_seq_length"], augment=self.config["augment"]
+            train["text"],
+            train["target"],
+            self.tokenizer,
+            self.config["max_seq_length"],
+            augment=self.config["augment"],
         )
 
         self.validation_dataset = TextClassificationDataset(
@@ -76,7 +80,9 @@ class ClassifierDataModule(pl.LightningDataModule):
 class TextClassificationDataset(Dataset):
     """Dataset module for text classification."""
 
-    def __init__(self, text: pd.Series, target: pd.Series | None, tokenizer: AutoTokenizer, max_length: int, augment=False):
+    def __init__(
+        self, text: pd.Series, target: pd.Series | None, tokenizer: AutoTokenizer, max_length: int, augment=False
+    ):
         """Create single dataset with targets."""
         self.text = list(text)
         self.target = list(target) if target is not None else None
@@ -86,7 +92,7 @@ class TextClassificationDataset(Dataset):
         self.augment = augment
         if self.augment:
             self.ocr_aug = nac.OcrAug(aug_char_p=0.1, aug_word_p=0.1)
-            self.random_char_aug = nac.RandomCharAug(action="swap", aug_char_p=0., aug_word_p=0.1)
+            self.random_char_aug = nac.RandomCharAug(action="swap", aug_char_p=0.0, aug_word_p=0.1)
             self.spelling_aug = naw.SpellingAug(aug_p=0.1)
 
     def __len__(self):
@@ -95,7 +101,6 @@ class TextClassificationDataset(Dataset):
 
     def __getitem__(self, idx):
         """Fetch a single sample from the dataset."""
-
         if self.augment:
             text = self.augmentation(self.text[idx])
         else:
@@ -113,6 +118,19 @@ class TextClassificationDataset(Dataset):
         return item
 
     def augmentation(self, text: str) -> str:
+        """
+        Augment text.
+
+        Parameters
+        ----------
+        text : str
+            The input text to be augmented.
+
+        Returns
+        -------
+        str
+            The augmented text after applying OCR, random character, and spelling augmentations.
+        """
         text = self.ocr_aug.augment(text, n=1)[0]
         text = self.random_char_aug.augment(text)[0]
         text = self.spelling_aug.augment(text)[0]
